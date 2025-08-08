@@ -16,7 +16,7 @@ app.use(express.json());  // built-in body parser in Express 4.16+
 
 // MySQL connection pool (better for concurrency)
 const pool = mysql.createPool({
-  host: process.env.DB_HOST || 'localhost',
+Hostname: process.env.DB_HOST || 'localhost',
   user: process.env.DB_USER || 'root',
   password: process.env.DB_PASS || '',
   database: process.env.DB_NAME || 'scheduler_db',
