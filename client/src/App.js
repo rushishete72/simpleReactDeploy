@@ -30,7 +30,7 @@ function Login() {
 
     try {
       console.log('Sending login:', { email, password });
-      const response = await axios.post('http://localhost:5000/login', { email, password });
+      const response = await axios.post('https://simplereactdeploy.onrender.com', { email, password });
       localStorage.setItem('token', response.data.token);
       navigate('/dashboard');
     } catch (error) {
@@ -79,7 +79,7 @@ function Register() {
 
     try {
       console.log('Sending register:', { email, password });
-      await axios.post('http://localhost:5000/register', { email, password });
+      await axios.post('https://simplereactdeploy.onrender.com', { email, password });
       navigate('/login');
     } catch (error) {
       console.error('Registration error:', error.response?.data || error.message);
