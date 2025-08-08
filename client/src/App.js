@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { BrowserRouter, Routes, Route, Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-// API Configuration
+// API Configuration - MUST set REACT_APP_API_URL in .env
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://your-backend-service.onrender.com';
 
 // Home Component
@@ -47,7 +47,10 @@ function Login() {
 
     try {
       setLoading(true);
-      const response = await axios.post(`${API_BASE_URL}/api/auth/login`, formData);
+      const response = await axios.post(`${API_BASE_URL}/api/auth/login`, {
+        email: formData.email,
+        password: formData.password
+      });
       
       localStorage.setItem('authToken', response.data.token);
       navigate('/dashboard');
