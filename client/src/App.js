@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import { BrowserRouter, Routes, Route, Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
+const API_URL = process.env.REACT_APP_API_URL || 'https://your-backend-service.onrender.com';
+
+
 // Home Component
 function Home() {
   return (
@@ -30,7 +33,7 @@ function Login() {
 
     try {
       console.log('Sending login:', { email, password });
-      const response = await axios.post('https://simplereactdeploy.onrender.com', { email, password });
+      const response = await axios.post(`${API_URL}/api/login`, { email, password });
       localStorage.setItem('token', response.data.token);
       navigate('/dashboard');
     } catch (error) {
@@ -79,7 +82,7 @@ function Register() {
 
     try {
       console.log('Sending register:', { email, password });
-      await axios.post('https://simplereactdeploy.onrender.com', { email, password });
+      await axios.post(`${API_URL}/api/login`, { email, password });
       navigate('/login');
     } catch (error) {
       console.error('Registration error:', error.response?.data || error.message);
