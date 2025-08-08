@@ -2,139 +2,201 @@ import React, { useState } from 'react';
 import { BrowserRouter, Routes, Route, Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-const API_URL = process.env.REACT_APP_API_URL || 'https://your-backend-service.onrender.com';
-
+// API Configuration
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://your-backend-service.onrender.com';
 
 // Home Component
 function Home() {
   return (
-    <div>
-      <h1>Welcome</h1>
-      <Link to="/login">Login</Link> | <Link to="/register">Register</Link>
+    <div className="container">
+      <h1>Welcome to Our App</h1>
+      <div className="auth-links">
+        <Link to="/login" className="btn">Login</Link>
+        <Link to="/register" className="btn">Register</Link>
+      </div>
     </div>
   );
 }
 
 // Login Component
 function Login() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [errorMsg, setErrorMsg] = useState('');
+  const [formData, setFormData] = useState({
+    email: '',
+    password: ''
+  });
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setErrorMsg(''); // Clear previous errors
-
-    if (!email || !password) {
-      setErrorMsg('Please enter email and password');
+    setError('');
+    
+    if (!formData.email || !formData.password) {
+      setError('Please fill in all fields');
       return;
     }
 
     try {
-      console.log('Sending login:', { email, password });
-      const response = await axios.post(`${API_URL}/api/login`, { email, password });
-      localStorage.setItem('token', response.data.token);
+      setLoading(true);
+      const response = await axios.post(`${API_BASE_URL}/api/auth/login`, formData);
+      
+      localStorage.setItem('authToken', response.data.token);
       navigate('/dashboard');
-    } catch (error) {
-      console.error('Login error:', error.response?.data || error.message);
-      setErrorMsg(error.response?.data?.error || 'Login failed');
+    } catch (err) {
+      console.error('Login error:', err);
+      setError(err.response?.data?.message || 'Login failed. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <input
-        type="email"
-        placeholder="Email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value.trim())}
-        required
-      />
-      <input
-        type="password"
-        placeholder="Password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        required
-      />
-      <button type="submit">Login</button>
-      {errorMsg && <p style={{ color: 'red' }}>{errorMsg}</p>}
-    </form>
+    <div className="auth-form">
+      <h2>Login</h2>
+      {error && <div className="error-message">{error}</div>}
+      <form onSubmit={handleSubmit}>
+        <div className="form-group">
+          <label>Email</label>
+          <input
+            type="email"
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
+            required
+          />
+        </div>
+        <div className="form-group">
+          <label>Password</label>
+          <input
+            type="password"
+            name="password"
+            value={formData.password}
+            onChange={handleChange}
+            required
+          />
+        </div>
+        <button type="submit" disabled={loading}>
+          {loading ? 'Logging in...' : 'Login'}
+        </button>
+      </form>
+    </div>
   );
 }
 
 // Register Component
 function Register() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [errorMsg, setErrorMsg] = useState('');
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+    confirmPassword: ''
+  });
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setErrorMsg(''); // Clear previous errors
-
-    if (!email || !password) {
-      setErrorMsg('Please enter email and password');
+    setError('');
+    
+    if (formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match');
       return;
     }
 
     try {
-      console.log('Sending register:', { email, password });
-      await axios.post(`${API_URL}/api/login`, { email, password });
+      setLoading(true);
+      await axios.post(`${API_BASE_URL}/api/auth/register`, {
+        email: formData.email,
+        password: formData.password
+      });
+      
       navigate('/login');
-    } catch (error) {
-      console.error('Registration error:', error.response?.data || error.message);
-      setErrorMsg(error.response?.data?.error || 'Registration failed');
+    } catch (err) {
+      console.error('Registration error:', err);
+      setError(err.response?.data?.message || 'Registration failed. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <input
-        type="email"
-        placeholder="Email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value.trim())}
-        required
-      />
-      <input
-        type="password"
-        placeholder="Password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        required
-      />
-      <button type="submit">Register</button>
-      {errorMsg && <p style={{ color: 'red' }}>{errorMsg}</p>}
-    </form>
+    <div className="auth-form">
+      <h2>Register</h2>
+      {error && <div className="error-message">{error}</div>}
+      <form onSubmit={handleSubmit}>
+        <div className="form-group">
+          <label>Email</label>
+          <input
+            type="email"
+            name="email"
+            value={formData.email}
+            onChange={handleChange}
+            required
+          />
+        </div>
+        <div className="form-group">
+          <label>Password</label>
+          <input
+            type="password"
+            name="password"
+            value={formData.password}
+            onChange={handleChange}
+            required
+          />
+        </div>
+        <div className="form-group">
+          <label>Confirm Password</label>
+          <input
+            type="password"
+            name="confirmPassword"
+            value={formData.confirmPassword}
+            onChange={handleChange}
+            required
+          />
+        </div>
+        <button type="submit" disabled={loading}>
+          {loading ? 'Registering...' : 'Register'}
+        </button>
+      </form>
+    </div>
   );
 }
 
 // Dashboard Component
 function Dashboard() {
-  const [newTask, setNewTask] = useState('');
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
+    localStorage.removeItem('authToken');
     navigate('/login');
   };
 
   return (
-    <div>
-      <h2>Dashboard</h2>
-      <button onClick={handleLogout}>Logout</button>
-
-      <div>
-        <input
-          type="text"
-          value={newTask}
-          onChange={(e) => setNewTask(e.target.value)}
-          placeholder="Add new task"
-        />
-        <button>Add Task</button>
+    <div className="dashboard">
+      <div className="header">
+        <h2>Dashboard</h2>
+        <button onClick={handleLogout} className="logout-btn">Logout</button>
+      </div>
+      
+      <div className="content">
+        <p>Welcome to your dashboard!</p>
       </div>
     </div>
   );
